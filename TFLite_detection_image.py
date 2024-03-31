@@ -20,6 +20,7 @@ import numpy as np
 import sys
 import glob
 import importlib.util
+import time
 
 
 # Define and parse input arguments
@@ -176,6 +177,17 @@ for image_path in images:
     interpreter.set_tensor(input_details[0]['index'],input_data)
     interpreter.invoke()
 
+    num_iterations = 50
+
+    #print("&&&&&&&&&&& Starting inference")
+    start_time = time.time()
+    for i in range(0, num_iterations):
+        interpreter.invoke()
+    stop_time = time.time()
+    #print("&&&&&&&&&&& Finished inference")
+
+    print('time: {:.3f}ms'.format((stop_time - start_time) * 1000 / num_iterations))
+
     # Retrieve detection results
     boxes = interpreter.get_tensor(output_details[boxes_idx]['index'])[0] # Bounding box coordinates of detected objects
     classes = interpreter.get_tensor(output_details[classes_idx]['index'])[0] # Class index of detected objects
@@ -235,4 +247,4 @@ for image_path in images:
                 f.write('%s %.4f %d %d %d %d\n' % (detection[0], detection[1], detection[2], detection[3], detection[4], detection[5]))
 
 # Clean up
-cv2.destroyAllWindows()
+#cv2.destroyAllWindows()
