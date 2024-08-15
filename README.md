@@ -9,6 +9,78 @@ Get started with training on Google Colab by clicking the icon below, or [click 
 
 <a href="https://colab.research.google.com/github/EdjeElectronics/TensorFlow-Lite-Object-Detection-on-Android-and-Raspberry-Pi/blob/master/Train_TFLite2_Object_Detction_Model.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
+## Direct demo instructions for Teflon
+
+```shell
+apt-get install python3-opencv python3-venv pkg-config libhdf5-dev python3-h5py python3-dev
+git clone https://github.com/mmind/TensorFlow-Lite-Object-Detection-on-Android-and-Raspberry-Pi.git
+mv TensorFlow-Lite-Object-Detection-on-Android-and-Raspberry-Pi tflite1
+cd tflite1
+git checkout teflon-demo
+
+python3 -m venv tflite1-env
+source tflite1-env/bin/activate
+pip3 install tensorflow
+pip3 install opencv-python
+```
+
+### The model
+
+The rocket Gallium driver currently can't run all models, so selecting a usable model is important.
+Know to work is the "modeldet" variant from core.ai. These can be found on https://coral.ai/models/object-detection/#trained-models
+Rocket uses the generic cpu models, but of course runs them on the npu. So don't select the edgetpu ones.
+
+```shell
+mkdir modeldet
+cd modeldet
+wget https://raw.githubusercontent.com/google-coral/test_data/master/ssdlite_mobiledet_coco_qat_postprocess.tflite
+wget https://raw.githubusercontent.com/google-coral/test_data/master/coco_labels.txt
+mv ssdlite_mobiledet_coco_qat_postprocess.tflite detect.tflite
+mv coco_labels.txt labelmap.txt
+cd ..
+```
+
+### Demo time
+
+The demo repository already contains demo-data, but of course "Sounds of New York City (59th Street at Lexington, Park and 5th Avenue)" is
+the video everybody wants for their object detection demo uses, which can be found on https://www.youtube.com/watch?v=QutLo5RsVHM
+
+Now run the demo inside a graphical interface.
+DELEGATE_PATH needs to point to teflon library build with MESA and TEFLON_DEBUG will
+allow to verify that things do run on the NPU. The prexisting edgetpu option us re-used to
+indicate to the Demo to use the delegate provided in DELEGATE_PATH.
+
+For the classic video demo, invoke:
+
+```shell
+source tflite1-env/bin/activate
+DELEGATE_PATH=/usr/lib/teflon/libteflon.so TEFLON_DEBUG=verbose python3 TFLite_detection_video.py --modeldir mobiledet --edgetpu --video newyork.mp4
+```
+
+You will see console output like
+
+```
+Teflon delegate: loaded rocket driver
+
+teflon: compiling graph: 180 tensors 47 operations
+idx scale     zp has_data size........
+=======================================
+  0 0.007812  80 no       1x300x300x3
+  1 0.007812  80 yes      1917x4x0x0
+[...]
+
+```
+and see the video played on the display with the green detection boxes.
+
+There is also an image-demo, which can be started with
+
+```shell
+source tflite1-env/bin/activate
+DELEGATE_PATH=/usr/lib/teflon/libteflon.so python3 TFLite_detection_image.py --modeldir mobiledet --edgetpu --image foo.jpg
+```
+
+
+
 ## Introduction
 TensorFlow Lite is an optimized framework for deploying lightweight deep learning models on resource-constrained edge devices. TensorFlow Lite models have faster inference time and require less processing power than regular TensorFlow models, so they can be used to obtain faster performance in realtime applications. 
 
